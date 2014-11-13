@@ -12,5 +12,5 @@ To setup, include the `prettySelectot.min.css` and `prettySelect.min.js` in your
 
 ###Credit###
 
-UI & Accesibility: Chris Rodriguez (https://github.com/clrux)
+UI & Accesibility: Chris Rodriguez (https://github.com/clrux)  
 Code & Modulation: Fyodor Wolf (https://github.com/fydo23)
