@@ -7,7 +7,6 @@ $green:                             #488C13;
         display: block;
         position: absolute;
         border: 0;
-        background: transparent;
         color: $blue;
         font-size: 100%;
         cursor: pointer;
@@ -27,11 +26,9 @@ $green:                             #488C13;
         list-style: none;
         margin: 0;
         padding: 0;
-        background: white;
 
         li {
             display: block;
-            width: 80%;
 
             a {
                 height: 28px;

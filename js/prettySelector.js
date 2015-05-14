@@ -135,6 +135,7 @@ var PrettySelector = {
     },
 
     setSelectedStatus: function(selectedId) {
+        oVal = s.oSelect.val();
         if(!selectedId)
             selectedId = s.oSelect.find('option:selected').attr('data-section-id');
         if(!selectedId)
@@ -143,7 +144,10 @@ var PrettySelector = {
         s.oSelect.find('option').removeAttr('selected').prop('selected', false);
         s.oReplaced.find('li[data-section-id='+selectedId+']').focus().attr('data-selected', true);
         sectionId = s.oReplaced.find('ul li[data-selected=true]').attr('data-section-id');
-        s.oSelect.find('option[data-section-id="' + sectionId + '"]').attr('selected', 'selected').prop('selected', true);
+        nVal = s.oSelect.find('option[data-section-id="' + sectionId + '"]').attr('selected', 'selected').prop('selected', true).val();
+        s.oSelect.val(nVal);    
+        if(oVal !== nVal)
+            s.oSelect.trigger('change');
     },
 
     moveFocusDown: function(e, f, l) {
