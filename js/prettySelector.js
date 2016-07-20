@@ -28,7 +28,7 @@ var PrettySelector = {
     oTogglerDown:   'icon-sel-down',
     oTogglerUp:     'icon-sel-up',
     container:
-    '<div class="search-in-replaced">'
+    '<div class="search-in-replaced" aria-hidden="true">'
         +'<span role="button" class="search-in-toggle" tabindex="0" aria-label="Expand search-in menu">'
             +'<span class="icon-sel-down"></span>'
         +'</span>'
@@ -38,15 +38,15 @@ var PrettySelector = {
 
 
     init: function(select) {
-        s = this;
-        s.oSelect = $(select);
-        s.oSelect.after($(this.container));
-        s.oReplaced = $('.search-in-replaced');
-        s.oToggler = $('.search-in-toggle');
-        s.oSelect.find('option').each(function(idx){
+        that = this;
+        this.oSelect = $(select);
+        this.oSelect.after($(this.container));
+        this.oReplaced = $('.search-in-replaced');
+        this.oToggler = $('.search-in-toggle');
+        this.oSelect.find('option').each(function(idx){
             $(this).attr('data-section-id',idx);
             $('.search-in-replaced').find('ul').append(
-                $(s.option)
+                $(that.option)
                     .attr("data-section-id",idx)
                     .attr('data-option-value',$(this).val())
                     .attr("data-selected", $(this).is(':selected'))
@@ -59,33 +59,37 @@ var PrettySelector = {
     },
 
     replaceSelectMenu: function() {
-        // s.oSelect.addClass('sr-only');
-        s.oSelect.hide();
-        s.oReplaced.show();
+        this.oSelect.hide();
+        this.oReplaced.show();
     },
 
     handleDropDown: function() {
         var that = this;
 
-        s.oToggler.on('click keydown', function(e) {
-            e.stopPropagation();
-            if (e.which == KEY_TAB) return that.collapseReplacedMenu();
-            if (e.which == KEY_RETURN) return $(this).closest('form').submit();
-            if (s.oToggler.next().attr('data-expanded') == "true") {
-                return that.collapseReplacedMenu();
+        this.oToggler.on('click keydown', function(e) {
+            switch(e.which){
+                case KEY_TAB:
+                    break;
+                case KEY_RETURN:
+                    e.stopPropagation();
+                    return $(this).closest('form').submit();
+                default:
+                    e.stopPropagation();
+                    if (that.oToggler.next().attr('data-expanded') == "true")
+                        return that.collapseReplacedMenu();
+                    return that.expandReplacedMenu();
             }
-            return that.expandReplacedMenu();
         });
 
-        s.oReplaced.find('li').on('click', function(e) {
+        this.oReplaced.find('li').on('click', function(e) {
             e.stopPropagation();
-            if (s.oToggler.next().attr('data-expanded') == "true") {
+            if (that.oToggler.next().attr('data-expanded') == "true") {
                 that.setSelectedStatus($(this).attr('data-section-id'));
             } 
-            s.oToggler.trigger('click');
+            that.oToggler.trigger('click');
         });
 
-        s.oSelect.on('change', function() {
+        this.oSelect.on('change', function() {
             that.setSelectedStatus();
         });
     },
@@ -93,19 +97,19 @@ var PrettySelector = {
     expandReplacedMenu: function() {
         var that = this;
 
-        s.oToggler.next().attr('data-expanded', true);
-        s.oToggler.find('span').removeClass(s.oTogglerDown).addClass(s.oTogglerUp);
+        this.oToggler.next().attr('data-expanded', true);
+        this.oToggler.find('span').removeClass(this.oTogglerDown).addClass(this.oTogglerUp);
 
-        liToFocus = s.oToggler.next().addClass('open').find('li:first')
-        if (s.oToggler.next().find('[data-selected=true]').length){
-            liToFocus = s.oToggler.next().find('[data-selected=true]');
+        liToFocus = this.oToggler.next().addClass('open').find('li:first')
+        if (this.oToggler.next().find('[data-selected=true]').length){
+            liToFocus = this.oToggler.next().find('[data-selected=true]');
         }
         liToFocus.focus();
 
-        s.oToggler.next().off('keydown').on('keydown', function(e, f, l) {
+        this.oToggler.next().off('keydown').on('keydown', function(e) {
 
-            f = s.oToggler.next().find('li:focus');
-            l = s.oToggler.next().find('li').length;
+            f = that.oToggler.next().find('li:focus');
+            l = that.oToggler.next().find('li').length;
 
             switch(e.which){
                 case KEY_DOWN:
@@ -114,12 +118,18 @@ var PrettySelector = {
                 case KEY_UP:
                     that.moveFocusUp(e, f, l);
                     break;
-                case KEY_RETURN:
                 case KEY_SPACE:
+                    e.preventDefault();
+                case KEY_RETURN:
                     select_section_id = f.attr('data-section-id');
                     that.setSelectedStatus(select_section_id);
-                case KEY_TAB:
                     that.collapseReplacedMenu();
+                case KEY_ESC:
+                    that.collapseReplacedMenu();
+                    break;
+                case KEY_TAB:
+                    e.preventDefault();
+                    break;
                 default:
                     break;
             }
@@ -128,37 +138,37 @@ var PrettySelector = {
     },
 
     collapseReplacedMenu: function() {
-        s.oToggler.next().removeClass('open');
-        s.oToggler.next().attr('data-expanded', false);
-        s.oToggler.find('span').removeClass(s.oTogglerUp).addClass(s.oTogglerDown);
-        s.oToggler.focus();
+       this.oToggler.next().removeClass('open');
+       this.oToggler.next().attr('data-expanded', false);
+       this.oToggler.find('span').removeClass(this.oTogglerUp).addClass(this.oTogglerDown);
+       this.oToggler.focus();
     },
 
     setSelectedStatus: function(selectedId) {
-        oVal = s.oSelect.val();
+        oVal = this.oSelect.val();
         if(!selectedId)
-            selectedId = s.oSelect.find('option:selected').attr('data-section-id');
+            selectedId = this.oSelect.find('option:selected').attr('data-section-id');
         if(!selectedId)
-            selectedId = s.oSelect.find('option:first').attr('data-section-id');
-        s.oReplaced.find('ul li').attr('data-selected', false);
-        s.oSelect.find('option').removeAttr('selected').prop('selected', false);
-        s.oReplaced.find('li[data-section-id='+selectedId+']').focus().attr('data-selected', true);
-        sectionId = s.oReplaced.find('ul li[data-selected=true]').attr('data-section-id');
-        nVal = s.oSelect.find('option[data-section-id="' + sectionId + '"]').attr('selected', 'selected').prop('selected', true).val();
-        s.oSelect.val(nVal);    
+            selectedId = this.oSelect.find('option:first').attr('data-section-id');
+        this.oReplaced.find('ul li').attr('data-selected', false);
+        this.oSelect.find('option').removeAttr('selected').prop('selected', false);
+        this.oReplaced.find('li[data-section-id='+selectedId+']').focus().attr('data-selected', true);
+        sectionId = this.oReplaced.find('ul li[data-selected=true]').attr('data-section-id');
+        nVal = this.oSelect.find('option[data-section-id="' + sectionId + '"]').attr('selected', 'selected').prop('selected', true).val();
+        this.oSelect.val(nVal);    
         if(oVal !== nVal)
-            s.oSelect.trigger('change');
+            this.oSelect.trigger('change');
     },
 
     moveFocusDown: function(e, f, l) {
         e.preventDefault();
-        if (s.oToggler.next().find('li').index(f) >= l-1) return;
+        if (this.oToggler.next().find('li').index(f) >= l-1) return;
         f.next().focus();
     },
 
     moveFocusUp: function(e, f, l) {
         e.preventDefault();
-        if (s.oToggler.next().find('li').index(f) <= 0) return;
+        if (this.oToggler.next().find('li').index(f) <= 0) return;
         f.prev().focus();
     }
 };
